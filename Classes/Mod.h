@@ -6,8 +6,6 @@
 //  Copyright 2010 Apple Inc. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
-
 typedef enum {
 	ModTypeStupid,
 	ModTypeOfftopic,
@@ -18,7 +16,6 @@ typedef enum {
 	ModTypeOntopic
 } ModType;
 
-
 @interface Mod : NSObject {
     
 }
@@ -26,4 +23,3 @@ typedef enum {
 + (void)modParentId:(NSUInteger)parentID modPostId:(NSUInteger)postId mod:(ModType)modType;
 
 @end
-

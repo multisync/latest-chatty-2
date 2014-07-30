@@ -3,16 +3,15 @@
 //  LatestChatty2
 //
 //  Created by Alex Wayne on 3/28/09.
-//  Copyright 2009 __MyCompanyName__. All rights reserved.
+//  Copyright 2009. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
 #import "Model.h"
 
 #import "NSStringAdditions.h"
-#import "StringAdditions.h"
 
 @class Image;
+
 @protocol ImageSendingDelegate
 - (void)image:(Image*)image sendComplete:(NSString*)url;
 - (void)image:(Image*)image sendFailure:(NSString*)message;
@@ -21,15 +20,16 @@
 
 @interface Image : NSObject {
 	UIImage *image;
-	NSObject<ImageSendingDelegate>* delegate;
+	NSObject<ImageSendingDelegate>* __weak delegate;
 }
-@property (assign,nonatomic) NSObject<ImageSendingDelegate>* delegate;
-@property (retain) UIImage *image;
+@property (weak,nonatomic) NSObject<ImageSendingDelegate>* delegate;
+@property (strong) UIImage *image;
 
 - (id)initWithImage:(UIImage *)anImage;
-- (void)autoRotateAndScale:(NSUInteger)maxDimension;
+- (void)autoRotate:(NSUInteger)maxDimension scale:(BOOL)shouldScale;
+//- (void)autoRotateAndScale:(NSUInteger)maxDimension;
 - (NSData *)compressJpeg:(CGFloat)quality;
-- (NSString *)base64String;
-- (void)uploadAndReturnImageUrlWithProgressView:(UIProgressView*)progressView;
+//- (NSString *)base64String;
+- (void)uploadAndReturnImageUrlWithDictionary:(NSDictionary*)args;
 
 @end

@@ -6,11 +6,6 @@
 //  Copyright 2010 Beautiful Pixel. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
-
-
-@interface NoContentController : UIViewController {
-
-}
+@interface NoContentController : UIViewController {}
 
 @end

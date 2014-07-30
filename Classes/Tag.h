@@ -3,10 +3,8 @@
 //  LatestChatty2
 //
 //  Created by Alex Wayne on 3/30/09.
-//  Copyright 2009 __MyCompanyName__. All rights reserved.
+//  Copyright 2009. All rights reserved.
 //
-
-#import <Foundation/Foundation.h>
 
 typedef enum {
     TagTypeLOL,
@@ -14,6 +12,7 @@ typedef enum {
     TagTypeUNF,
     TagTypeTAG,
     TagTypeWTF,
+    TagTypeUGH
 } TagType;
 
 @interface Tag : NSObject {
@@ -21,5 +20,8 @@ typedef enum {
 }
 
 + (void)tagPostId:(NSUInteger)postId tag:(NSString*)tag;
++ (NSMutableString *)buildPostViewTag:(NSDictionary *)lolCounts;
++ (NSMutableAttributedString *)buildThreadCellTag:(NSDictionary *)lolCounts;
++ (void)getLolTags;
 
 @end

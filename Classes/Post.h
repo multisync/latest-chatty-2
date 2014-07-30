@@ -3,15 +3,11 @@
 //  LatestChatty2
 //
 //  Created by Alex Wayne on 3/17/09.
-//  Copyright 2009 __MyCompanyName__. All rights reserved.
+//  Copyright 2009. All rights reserved.
 //
 
-#import <Foundation/Foundation.h>
 #import "Model.h"
-#import "StringAdditions.h"
 #import "ModelLoader.h"
-#import "RegexKitLite.h"
-#import "StringAdditions.h"
 
 @interface Post : Model {
 	NSString *author;
@@ -33,6 +29,8 @@
 	NSUInteger      timeLevel;
 	BOOL newPost;
 	BOOL pinned;
+    
+    NSDictionary *lolCounts;
 }
 
 @property (copy) NSString *author;
@@ -41,14 +39,15 @@
 @property (copy) NSDate *date;
 @property (readonly) NSUInteger replyCount;
 @property (copy) NSString *category;
-@property (readonly) UIColor *categoryColor;
+@property (weak, readonly) UIColor *categoryColor;
+@property (weak, readonly) UIColor *expirationColor;
 
 @property (readonly) NSUInteger storyId;
 @property (readonly) NSUInteger parentPostId;
 @property (readonly) NSUInteger lastReplyId;
 
-@property (retain) NSMutableArray *participants;
-@property (retain) NSMutableArray *replies;
+@property (strong) NSMutableArray *participants;
+@property (strong) NSMutableArray *replies;
 @property (assign) NSInteger depth;
 
 @property (assign) NSUInteger timeLevel;
@@ -57,7 +56,12 @@
 @property (assign) BOOL newPost;
 @property (assign) BOOL pinned;
 
+@property (strong) NSDictionary *lolCounts;
+
 + (UIColor *)colorForPostCategory:(NSString *)categoryName;
++ (UIColor *)colorForPostExpiration:(NSDate *)date withCategory:(NSString *)categoryName;
++ (CGFloat)sizeForPostExpiration:(NSDate *)date;
++ (UIImage *)imageForPostExpiration:(NSDate *)date withParticipant:(BOOL)hasParticipant;
 
 + (ModelLoader *)findAllWithStoryId:(NSUInteger)storyId pageNumber:(NSUInteger)pageNumber delegate:(id<ModelLoadingDelegate>)delegate;
 + (ModelLoader *)findAllWithStoryId:(NSUInteger)storyId delegate:(id<ModelLoadingDelegate>)delegate;
@@ -67,6 +71,9 @@
 + (ModelLoader *)searchWithTerms:(NSString *)terms author:(NSString *)authorName parentAuthor:(NSString *)parentAuthor page:(NSUInteger)page delegate:(id<ModelLoadingDelegate>)delegate;
 
 + (BOOL)createWithBody:(NSString *)body parentId:(NSUInteger)parentId storyId:(NSUInteger)storyId;
+
++ (void)pin:(Post *)post;
++ (void)unpin:(Post *)post;
 
 - (NSArray *)repliesArray;
 - (NSArray *)repliesArray:(NSMutableArray *)parentArray;

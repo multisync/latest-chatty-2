@@ -6,15 +6,14 @@
 //
 //
 
-#import <UIKit/UIKit.h>
-
 @interface GoogleChromeActivity : UIActivity
 
-@property (nonatomic, retain) NSURL *url;
+@property (nonatomic, strong) NSURL *url;
 
 - (NSString *)activityType;
 - (NSString *)activityTitle;
 - (UIImage *)activityImage;
+
 - (BOOL)canPerformWithActivityItems:(NSArray *)activityItems;
 - (void)prepareWithActivityItems:(NSArray *)activityItems;
 - (void)performActivity;

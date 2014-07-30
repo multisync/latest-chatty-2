@@ -3,19 +3,24 @@
 //  LatestChatty2
 //
 //  Created by Alex Wayne on 4/20/09.
-//  Copyright 2009 __MyCompanyName__. All rights reserved.
+//  Copyright 2009. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
 #import "SearchResultsViewController.h"
 
 @interface SearchViewController : UIViewController <UITextFieldDelegate> {
-  IBOutlet UITableView *inputTable;
-  IBOutlet UISegmentedControl *segmentedBar;
-  
-  UITextField *termsField;
-  UITextField *authorField;
-  UITextField *parentAuthorField;
+    IBOutlet UITableView *inputTable;
+    IBOutlet UISegmentedControl *segmentedBar;
+    IBOutlet UIView *recentSearchView;
+    IBOutlet UIScrollView *recentSearchScrollView;
+    
+    UITextField *termsField;
+    UITextField *authorField;
+    UITextField *parentAuthorField;
+    
+    NSString *searchTerms;
+    NSString *searchAuthor;
+    NSString *searchParentAuthor;
 }
 
 - (IBAction)modeChanged;

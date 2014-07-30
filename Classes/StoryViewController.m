@@ -3,29 +3,31 @@
 //    LatestChatty2
 //
 //    Created by Alex Wayne on 3/18/09.
-//    Copyright 2009 __MyCompanyName__. All rights reserved.
+//    Copyright 2009. All rights reserved.
 //
 
 #import "StoryViewController.h"
-#import "LatestChatty2AppDelegate.h"
-
 
 @implementation StoryViewController
 
-@synthesize story, storyLoader;
-@synthesize content;
+@synthesize storyLoader, story, content;
 
 - (id)initWithStoryId:(NSUInteger)aStoryId {
     self = [super initWithNib];
+    
     storyId = aStoryId;
     self.title = @"Loading...";
+    
     return self;
 }
 
 - (id)initWithStory:(Story *)aStory {
     self = [self initWithNib];
+    
     self.story = aStory;
-    self.title = story.title;
+//    self.title = aStory.title;
+    self.title = @"Story";
+    
     return self;
 }
 
@@ -43,6 +45,7 @@
 - (void)didFinishLoadingModel:(id)model otherData:(id)otherData {
     self.story = model;
     self.storyLoader = nil;
+    
     [self displayStory];
 }
 
@@ -53,16 +56,17 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     
-    self.navigationItem.rightBarButtonItem = [UIBarButtonItem itemWithImage:[UIImage imageNamed:@"ChatIcon.24.png"]
+    self.navigationItem.rightBarButtonItem = [UIBarButtonItem itemWithImage:[UIImage imageNamed:@"Menu-Button-Thread.png"]
                                                                       style:UIBarButtonItemStylePlain
                                                                      target:self
                                                                      action:@selector(loadChatty)];
+    self.navigationItem.rightBarButtonItem.enabled = NO;
     
     // Load story
     self.storyLoader = [Story findById:storyId delegate:self];
     
-    NSString *baseUrlString = [NSString stringWithFormat:@"http://shacknews.com/onearticle.x/%i", story.modelId];
-    StringTemplate *htmlTemplate = [[[StringTemplate alloc] initWithTemplateName:@"Story.html"] autorelease];
+    NSString *baseUrlString = [NSString stringWithFormat:@"http://shacknews.com/onearticle.x/%lu", (unsigned long)story.modelId];
+    StringTemplate *htmlTemplate = [[StringTemplate alloc] initWithTemplateName:@"Story.html"];
     NSString *stylesheet = [NSString stringFromResource:@"Stylesheet.css"];
     [htmlTemplate setString:stylesheet forKey:@"stylesheet"];
     [htmlTemplate setString:@"" forKey:@"date"];
@@ -71,46 +75,71 @@
     [htmlTemplate setString:@"" forKey:@"storyTitle"];
     
     [content loadHTMLString:htmlTemplate.result baseURL:[NSURL URLWithString:baseUrlString]];
+    
+    // iOS7
+    self.navigationController.navigationBar.translucent = NO;
+    
+    // top separation bar
+    UIView *topStroke = [[UIView alloc] initWithFrame:CGRectMake(0, 0, 1024, 1)];
+    [topStroke setBackgroundColor:[UIColor lcTopStrokeColor]];
+    [topStroke setAutoresizingMask:UIViewAutoresizingFlexibleWidth];
+    [self.view addSubview:topStroke];
+    
+    // scroll indicator coloring
+    [content.scrollView setIndicatorStyle:UIScrollViewIndicatorStyleWhite];
 }
 
-- (void)displayStory {
-    self.title = story.title;
-    
-    // Load up web view content
-    NSString *baseUrlString = [NSString stringWithFormat:@"http://shacknews.com/onearticle.x/%i", story.modelId];
-    
-    //if ([[LatestChatty2AppDelegate delegate] isPadDevice]) {
-    //    [content loadRequest:[NSURLRequest requestWithURLString:baseUrlString]];
-    //} else {
-        StringTemplate *htmlTemplate = [[[StringTemplate alloc] initWithTemplateName:@"Story.html"] autorelease];
-        
-        NSString *stylesheet = [NSString stringFromResource:@"Stylesheet.css"];
-        [htmlTemplate setString:stylesheet forKey:@"stylesheet"];
-        [htmlTemplate setString:[Story formatDate:story.date] forKey:@"date"];
-        [htmlTemplate setString:[NSString stringWithFormat:@"%i", story.modelId] forKey:@"storyId"];
-        [htmlTemplate setString:story.body forKey:@"content"];
-        [htmlTemplate setString:story.title forKey:@"storyTitle"];
-        
-        [content loadHTMLString:htmlTemplate.result baseURL:[NSURL URLWithString:baseUrlString]];
-    //}
+- (NSUInteger)supportedInterfaceOrientations {
+    return [LatestChatty2AppDelegate supportedInterfaceOrientations];
 }
-
 
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
-    //    if ([[NSUserDefaults standardUserDefaults] boolForKey:@"landscape"]) return YES;
-    return YES;
-    return UIInterfaceOrientationIsPortrait(interfaceOrientation);
+    return [LatestChatty2AppDelegate shouldAutorotateToInterfaceOrientation:interfaceOrientation];
 }
 
+#pragma mark Actions
+
+- (void)displayStory {
+    self.title = @"Story";
+    
+    // Load up web view content
+    NSString *baseUrlString = [NSString stringWithFormat:@"http://shacknews.com/onearticle.x/%lu", (unsigned long)story.modelId];
+    
+    StringTemplate *htmlTemplate = [[StringTemplate alloc] initWithTemplateName:@"Story.html"];
+    
+    NSString *stylesheet = [NSString stringFromResource:@"Stylesheet.css"];
+    [htmlTemplate setString:stylesheet forKey:@"stylesheet"];
+    [htmlTemplate setString:[Story formatDate:story.date] forKey:@"date"];
+    [htmlTemplate setString:[NSString stringWithFormat:@"%lu", (unsigned long)story.modelId] forKey:@"storyId"];
+    [htmlTemplate setString:story.body forKey:@"content"];
+    [htmlTemplate setString:story.title forKey:@"storyTitle"];
+    
+    [content loadHTMLString:htmlTemplate.result baseURL:[NSURL URLWithString:baseUrlString]];
+    
+    self.navigationItem.rightBarButtonItem.enabled = YES;
+}
 
 - (void)loadChatty {
-    ChattyViewController *viewController = [ChattyViewController chattyControllerWithStoryId:story.modelId];
+    UIViewController *viewController;
+    
+    if (story.threadId > 0) {
+        viewController = [[ThreadViewController alloc] initWithThreadId:story.threadId];
+    } else {
+        viewController = [ChattyViewController chattyControllerWithStoryId:story.modelId];
+    }
+
     if ([[LatestChatty2AppDelegate delegate] isPadDevice]) {
-        [[LatestChatty2AppDelegate delegate].navigationController pushViewController:viewController animated:YES];
+        if (story.threadId > 0) {
+            [[LatestChatty2AppDelegate delegate].contentNavigationController pushViewController:viewController animated:YES];
+        } else {
+            [[LatestChatty2AppDelegate delegate].navigationController pushViewController:viewController animated:YES];
+        }
     } else {
         [self.navigationController pushViewController:viewController animated:YES];
     }
 }
+
+#pragma mark Web view methods
 
 - (BOOL)webView:(UIWebView *)aWebView shouldStartLoadWithRequest:(NSURLRequest *)request navigationType:(UIWebViewNavigationType)navigationType {
     if (navigationType == UIWebViewNavigationTypeLinkClicked) {
@@ -151,10 +180,9 @@
                         return NO;
                     }
                 }
-                
             }
             
-            viewController = [[[BrowserViewController alloc] initWithRequest:request] autorelease];
+            viewController = [[BrowserViewController alloc] initWithRequest:request];
         }
         
         [self.navigationController pushViewController:viewController animated:YES];
@@ -165,17 +193,13 @@
     return YES;
 }
 
-- (void)dealloc {
-    content.delegate = nil;
-    [content stopLoading];
-    self.content = nil;
-    
-    [storyLoader cancel];
-    self.storyLoader = nil;
-    
-    self.story = nil;
-    [super dealloc];
-}
+#pragma mark Cleanup
 
+- (void)dealloc {
+    [storyLoader cancel];
+    
+    [content stopLoading];
+    content.delegate = nil;
+}
 
 @end
